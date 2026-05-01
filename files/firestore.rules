@@ -1,0 +1,78 @@
+// ============================================================
+//  Firestore Security Rules — Smart Faculty Notification System
+//
+//  IMPORTANT: These are STARTER rules for development.
+//  Before going to production, tighten these rules.
+//
+//  Replace "YOUR_ADMIN_UID" with actual admin UIDs.
+// ============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    function isFaculty() {
+      return isAuthenticated() && getUserRole() == 'faculty';
+    }
+
+    function isStudent() {
+      return isAuthenticated() && getUserRole() == 'student';
+    }
+
+    // ── users collection ────────────────────────────────────────
+    match /users/{uid} {
+      allow read:   if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(uid);
+      allow update: if isAuthenticated() && (isOwner(uid) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── students collection ─────────────────────────────────────
+    match /students/{uid} {
+      allow read:   if isAuthenticated();
+      allow write:  if isAuthenticated() && (isOwner(uid) || isAdmin());
+    }
+
+    // ── faculty_status collection ────────────────────────────────
+    match /faculty_status/{uid} {
+      allow read:   if isAuthenticated();
+      allow write:  if isAuthenticated() && (isOwner(uid) || isAdmin());
+    }
+
+    // ── rooms collection ─────────────────────────────────────────
+    match /rooms/{roomId} {
+      allow read:   if isAuthenticated();
+      allow write:  if isAuthenticated() && (isAdmin() || isFaculty());
+    }
+
+    // ── notifications collection ─────────────────────────────────
+    match /notifications/{notifId} {
+      allow read:   if isAuthenticated() && (
+        resource.data.sent_to == request.auth.uid || isAdmin()
+      );
+      allow create: if isAuthenticated() && (isAdmin() || isFaculty());
+      allow update: if isAuthenticated() && (
+        resource.data.sent_to == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+  }
+}

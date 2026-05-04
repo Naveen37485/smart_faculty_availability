@@ -24,13 +24,13 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 // ── Replace these values with your Firebase project credentials ──
 const firebaseConfig = {
-  apiKey: "AIzaSyCR8MuQ5Air9veexYH05gGwo5giaijVTlQ",
-  authDomain: "smart-faculty-system.firebaseapp.com",
-  projectId: "smart-faculty-system",
-  storageBucket: "smart-faculty-system.firebasestorage.app",
-  messagingSenderId: "867084201074",
-  appId: "1:867084201074:web:74ac8e151199343a7ca6eb",
-  measurementId: "G-QSWH4HBP5B"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // ── Initialize Firebase Services ────────────────────────────────
@@ -40,7 +40,7 @@ export const db        = getFirestore(app);
 export const messaging = getMessaging(app);
 
 // ── FCM VAPID Public Key ─────────────────────────────────────────
-const VAPID_KEY = "BM2FVgQ6cuUAQaVscSb9VI3G_V0WHRqAfBO8m7lecbfC9IVPpKw2Wg5l8wBrqnLFICwmhHb8oLubFFV_IrzglrU";
+const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
 // ── Request Notification Permission & Get FCM Token ─────────────
 export async function getFCMToken() {
